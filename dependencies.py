@@ -10,6 +10,8 @@ from nltk.parse.stanford import StanfordDependencyParser
 import os
 import re
 from scripts import vocab, extract_deps
+from subprocess import call
+
 java_path = "C:/Program Files/Java/jdk1.8.0_131/bin/java.exe"
 os.environ['JAVAHOME'] = java_path
 
@@ -20,12 +22,11 @@ def load_corpus(path):
     print("Loading corpus...")
     with open(path, 'r', encoding="utf8") as corpus_file:
         corpus = corpus_file.read().replace('---END.OF.DOCUMENT---', '').replace('\n', '')
-    print(corpus)
     return corpus
 
 def count_words(corpus, threshold):
+    print("Counting words...")
     corpus_words = re.findall(r"[\w']+", corpus.lower())
-    print(corpus_words)
     return vocab.count(corpus_words, threshold)
 
 #delete this
@@ -53,18 +54,35 @@ def text_to_conll(corpus):
     return conll_corpus
 
 def create_vocabularies(corpus, threshold):
+    print("Creating vocabularies...")
     word_count = count_words(corpus, threshold)
     with open('CorpusSample.conll', encoding="utf-8") as conll_file:
         conll_dependencies = conll_file.readlines()
-        print('conll: ', conll_dependencies[0])
     contexts = extract_deps.extract_contexts(conll_dependencies, word_count, threshold)
-    print('contexts: ', contexts)
+    print('CONTEXTS: ', contexts[len(contexts) - 1])
+    dep_context = ''
+    for context in contexts:
+        dep_context += '\t'.join(context)+'\n'
+    print('contexts: ', dep_context)
+    with open('dep.contexts', 'w', encoding="utf-8") as context_file:
+        context_file.write(dep_context)
+    call(["word2vecf/count_and_filter", "-train", "dep.contexts", "-cvocab", "cv", "-wvocab", "wv", "-min-count", "10"])
+
+def train_embeddings():
+    call(["word2vecf/word2vecf", "-train", "dep.contexts", "-wvocab", "wv", "-cvocab", "cv", "-output", "dim200vecs", "-size", "200", "-negative", "15",
+          "-threads", "10", "-dumpcv", "dim200context-vecs"])
 
 if __name__ == '__main__':
-    corpus_path = 'CorpusSample.txt'
+    #corpus_path = 'CorpusSample.txt'
+    corpus_path = 'WestburyLab.Wikipedia.Corpus.txt'
     threshold = 10
     corpus = load_corpus(corpus_path)
-    contexts = create_vocabularies(corpus, threshold)
+    corpus_conll = load_corpus(corpus)
+    print
+    with open('WikipediaCorpus.conll', 'w', encoding="utf-8") as corpus_file:
+        corpus_file.write(corpus_conll)
+    #create_vocabularies(corpus, threshold)
+    #train_embeddings()
 
 #sentence = 'The government plan was a success.'
 
