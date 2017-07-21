@@ -3,15 +3,16 @@ from collections import Counter
 
 def count(corpus, threshold):
     wc = Counter()
+    print("Corpus length: ",len(corpus))
     l = []
     for i,w in enumerate(corpus):
-       #print(i,w)
-       if i % 1000000 == 0:
-          #if i > 10000000: break
-          #print(sys.stderr,i,len(wc))
-          wc.update(l)
-          l = []
-       l.append(w)
+        #print(i,w)
+        if i % 1000000 == 0:
+            #if i > 10000000: break
+            #print(sys.stderr,i,len(wc))
+            wc.update(l)
+            l = []
+        l.append(w)
     wc.update(l)
 
     word_count = ""

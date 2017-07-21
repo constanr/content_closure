@@ -1,19 +1,20 @@
 import numpy as np
 import sys
 
-fh=file(sys.argv[1])
-foutname=sys.argv[2]
-first=fh.next()
-size=map(int,first.strip().split())
+def vecs2nps(embeddings_path, vectors_path):
+    with open(embeddings_path) as embeddings:
+        fh = embeddings.readlines()
 
-wvecs=np.zeros((size[0],size[1]),float)
+    size=list(map(int,fh[0].strip().split()))
 
-vocab=[]
-for i,line in enumerate(fh):
-    line = line.strip().split()
-    vocab.append(line[0])
-    wvecs[i,] = np.array(map(float,line[1:]))
+    wvecs=np.zeros((size[0],size[1]),float)
 
-np.save(foutname+".npy",wvecs)
-with file(foutname+".vocab","w") as outf:
-   print >> outf, " ".join(vocab)
+    vocab=[]
+    for i,line in enumerate(fh[1:]):
+        line = line.strip().split()
+        vocab.append(line[0])
+        wvecs[i,] = np.array(list(map(float,line[1:])))
+
+    np.save(vectors_path+".npy",wvecs)
+    with open(vectors_path+".vocab","w") as outf:
+       outf.write(" ".join(vocab))
