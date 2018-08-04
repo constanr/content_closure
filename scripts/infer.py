@@ -42,7 +42,7 @@ class Embeddings:
         sim = self._vecs[w2].dot(self._vecs[w1])
         return sim
 
-    def analogy(self, pos1, neg1, pos2, N=10, mult=True):
+    def analogy(self, neg1, pos1, pos2, N=10, mult=True):
         wvecs, vocab = self._vecs, self._vocab
         p1 = vocab.index(pos1)
         p2 = vocab.index(pos2)
@@ -59,11 +59,13 @@ class Embeddings:
             return heapq.nlargest(N, ((v, w) for v, w in zip((p1 + p2 - n1), vocab) if w not in [pos1, pos2, neg1]))
 
 
-"""if __name__ == '__main__':
-   import sys
+if __name__ == '__main__':
 
    e = Embeddings.load("../vecs.npy")
 
-   #print(e.most_similar('clinton'))
-   #print(e.analogy('moscow','russia','italy'))
-"""
+   print(e.most_similar('madrid'))
+   print(e.analogy('antes','despues','ayer'))
+
+   print(e.similarity('madrid', 'barcelona'))
+
+
